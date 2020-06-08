@@ -1,4 +1,5 @@
 import React from 'react';
+import { getInitMessage } from "./api/consume";
 
 const Messages = (props) => {
     
@@ -16,10 +17,7 @@ const App = () => {
         text: "",
         issuer: "user"
     });
-    const [conversation, setConversation] = React.useState([{
-        text: "Hi! I'm a bot. What's up?",
-        issuer: "bot"
-    }]);
+    const [conversation, setConversation] = React.useState([]);
 
     const handleChange = (event) => {
         let message = event.target.value;
