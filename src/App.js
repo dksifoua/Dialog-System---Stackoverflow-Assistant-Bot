@@ -1,59 +1,71 @@
 import React from 'react';
-import MessageContainer from "./components/MessageContainer";
-import MessageTextBox from "./components/MessageTextBox";
-import SendButton from "./components/SendButton";
+
+const Messages = (props) => {
+    
+    return props.conversation.map((message, index) => (
+        <div key={ index } className={ `${message.issuer}-message` }>
+            <div className="message">{ message.text }</div>
+        </div>
+    ));
+};
 
 const App = () => {
+    const chatbotOutputRef = React.createRef();
 
-    const [messages, setMessages] = React.useState([]);
-    const [currentMessage, setCurrentMessage] = React.useState({
+    const [userMessage, setUserMessage] = React.useState({
         text: "",
-        is_bot: false
+        issuer: "user"
     });
+    const [conversation, setConversation] = React.useState([{
+        text: "Hi! I'm a bot. What's up?",
+        issuer: "bot"
+    }]);
 
-    const handleMessage = (e) => {
-        setCurrentMessage({
-            text: e.target.value,
-            is_bot: false
-        });
-    }
-
-    const handlePressKey = (e) => {
-        if(e.key === "Enter" && currentMessage.text) {
-            sendMessage();
-        }
-    }
-
-    const handleClick = () => {
-        sendMessage();
-    }
-
-    const sendMessage = () => {
-        if(currentMessage.text) {
-            let botMessage = {
-                text: "Your message: " + currentMessage.text,
-                is_bot: true
-            }
-            setMessages([...messages, currentMessage, botMessage]);
-            setCurrentMessage({
-                text: "",
-                is_bot: false
+    const handleChange = (event) => {
+        let message = event.target.value;
+        if(message) {
+            setUserMessage({
+                text: message,
+                 issuer: "user"
             });
         }
-    }
+    };
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        setConversation([...conversation, userMessage, {
+            text: "Message: " + userMessage.text,
+            issuer: "bot"
+        }]);
+        setUserMessage({
+            text: "",
+             issuer: "user"
+        });
+    };
+
+    React.useEffect(() => {
+        chatbotOutputRef.current.scrollTop = chatbotOutputRef.current.scrollHeight;
+    });
 
     return (
-        <div className="container mx-auto my-10 w-3/4 h-full px-4 bg-gray-300 rounded-lg shadow-lg">
-            <MessageContainer messages={ messages } />
-            <MessageTextBox
-                message={ currentMessage.text }
-                onChange={ handleMessage }
-                handleKeyPress={ handlePressKey }
-            >
-                <SendButton handleClick={handleClick} />
-            </MessageTextBox>
+        <div className="bot">
+            <div className="chat-output" id="chat-output" ref={ chatbotOutputRef }>
+                <Messages conversation={ conversation } />
+            </div>
+            <div className="chat-input">
+                <form action="#0" id="user-input-form" onSubmit={ handleSubmit }>
+                    <input
+                        type="text"
+                        id="user-input"
+                        className="user-input"
+                        placeholder="Talk to StackOverflow Assistant Bot."
+                        value={ userMessage.text }
+                        onChange={ handleChange }
+                    />
+                </form>
+            </div>
         </div>
     );
-}
+};
 
 export default App;
