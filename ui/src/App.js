@@ -1,5 +1,5 @@
-import React from 'react';
-import { getInitMessage } from "./api/consume";
+import React from 'react'
+import { getInitMessage, getResponseMessage } from "./api/consume"
 
 const Messages = (props) => {
     
@@ -7,43 +7,56 @@ const Messages = (props) => {
         <div key={ index } className={ `${message.issuer}-message` }>
             <div className="message">{ message.text }</div>
         </div>
-    ));
-};
+    ))
+}
 
 const App = () => {
-    const chatbotOutputRef = React.createRef();
+    const chatbotOutputRef = React.createRef()
 
     const [userMessage, setUserMessage] = React.useState({
         text: "",
         issuer: "user"
-    });
-    const [conversation, setConversation] = React.useState([]);
+    })
+    const [conversation, setConversation] = React.useState([])
 
     const handleChange = (event) => {
-        let message = event.target.value;
+        let message = event.target.value
         if(message) {
             setUserMessage({
                 text: message,
                  issuer: "user"
-            });
+            })
         }
-    };
+    }
 
     const handleSubmit = (event) => {
-        event.preventDefault();
-        setConversation([...conversation, userMessage, {
-            text: "Message: " + userMessage.text,
-            issuer: "bot"
-        }]);
-        setUserMessage({
-            text: "",
-             issuer: "user"
-        });
-    };
+        event.preventDefault()
+        getResponseMessage(userMessage.text)
+            .then(res => {
+                setConversation([...conversation, userMessage, {
+                    text: res.data,
+                    issuer: "bot"
+                }])
+                setUserMessage({
+                    text: "",
+                    issuer: "user"
+                })
+            })
+    }
 
     React.useEffect(() => {
-        chatbotOutputRef.current.scrollTop = chatbotOutputRef.current.scrollHeight;
-    });
+        getInitMessage()
+            .then(res => {
+                setConversation([{
+                    text: res.data,
+                    issuer: "bot"
+                }])
+            })
+    }, [])
+
+    React.useEffect(() => {
+        chatbotOutputRef.current.scrollTop = chatbotOutputRef.current.scrollHeight
+    })
 
     return (
         <div className="bot">
@@ -63,7 +76,7 @@ const App = () => {
                 </form>
             </div>
         </div>
-    );
-};
+    )
+}
 
-export default App;
+export default App
